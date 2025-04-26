@@ -113,6 +113,8 @@ services:
       start_period: 5s
     ports:
       - ${KC_POSTGRES_PORT_MAPPING:-5435}:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  # Монтируем volume для данных PostgreSQL
     deploy:
       resources:
         limits:
@@ -131,8 +133,14 @@ services:
       KC_FEATURES: preview
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/server.crt.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/server.key.pem
+    volumes:
+      - ./server.crt.pem:/opt/keycloak/conf/server.crt.pem
+      - ./server.key.pem:/opt/keycloak/conf/server.key.pem
+      - keycloak-data:/opt/keycloak/data
     ports:
-      - 8282:8080
+      - "8443:8443"
     depends_on:
       keycloak-postgres:
         condition: service_healthy
@@ -142,25 +150,6 @@ services:
       interval: 30s
       retries: 3
       timeout: 5s
-
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: clickhouse
-    ports:
-      - "8123:8123"
-      - "9000:9000"
-      - "9009:9009"
-    volumes:
-      - ./clickhouse-data:/var/lib/clickhouse
-    environment:
-      - CLICKHOUSE_USER=default 
-      - CLICKHOUSE_PASSWORD=your_password
-      - CLICKHOUSE_DB=test_db
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    restart: always
 
   backend-service:
     container_name: backend-service
@@ -186,9 +175,6 @@ services:
     build:
       context: ../ml-service
       dockerfile: ../ml-service/Dockerfile
-
-    ports:
-      - "5000:5000"
     networks:
       - mynetwork
 
@@ -200,4 +186,8 @@ volumes:
   minio-data:
     driver: local
   mongo-data:
+    driver: local
+  keycloak-data:
+    driver: local
+  postgres-data:
     driver: local
