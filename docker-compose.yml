@@ -132,7 +132,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
-      - 8443:8080
+      - "8282:8080"
     depends_on:
       keycloak-postgres:
         condition: service_healthy
