@@ -132,7 +132,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
-      - 8282:8080
+      - 8443:8443
     depends_on:
       keycloak-postgres:
         condition: service_healthy
@@ -148,7 +148,7 @@ services:
     container_name: clickhouse
     ports:
       - "8123:8123"
-      - "9000:9000"
+      - "9001:9000"
       - "9009:9009"
     volumes:
       - ./clickhouse-data:/var/lib/clickhouse
